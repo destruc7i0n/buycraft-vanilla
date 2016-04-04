@@ -28,7 +28,7 @@ $ node index.js
     "MINECRAFT_SERVER_RCON_PASSWORD": "<your password>", /* minecraft server rcon password */
     "MINECRAFT_SERVER_IP": "example.com", /* minecraft server ip (not rcon) */
     "MINECRAFT_SERVER_PORT": 25565, /* minecraft server port (no rcon) */
-    "RCON_RECONNECT_DELAY": 10, /* how mant seconds before trying to reconnect to rcon */
+    "RCON_RECONNECT_DELAY": 10, /* how many seconds before trying to reconnect to rcon */
     "DEBUG": true /* dev debugging */
 }
 ```
