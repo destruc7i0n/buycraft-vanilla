@@ -40,7 +40,7 @@ $ node index.js
 If you have any suggestions or feature requests, feel free to add an issue and I will take a look and possibly add it to the "Upcoming" section!
 
 ## Thanks
-* [minecrafter](https://github.com/hydrabolt) for buycraft-js
+* [minecrafter](https://github.com/minecrafter) for buycraft-js
 * [SecretOnline](https://github.com/secretonline) for Rcon reconnecting
 
 ## License
