@@ -2,13 +2,12 @@
 var BuycraftAPI = require("buycraft-js");
 var Query = require("mcquery");
 var Rcon = require("rcon");
-var sleep = require("sleep");
-var async = require("async");
+
 var c = require("./config.json");
 var debug = c.DEBUG;
 var client = new BuycraftAPI(c.BUYCRAFT_API_KEY);
 var rclient = new Rcon(c.MINECRAFT_SERVER_RCON_IP, c.MINECRAFT_SERVER_RCON_PORT, c.MINECRAFT_SERVER_RCON_PASSWORD); // connect to Rcon
-var rconTimeout, maininfo, players, commands, command, finalcommand, finalcommandsplit, finalcommandd;
+var rconTimeout, maininfo, players, playercount, commands, command, finalcommand, finalcommandsplit, finalcommandd;
 var query = new Query(c.MINECRAFT_SERVER_IP, c.MINECRAFT_SERVER_PORT, { timeout: 500 }); // query server for player list  
 
 // first check to make sure key works
@@ -44,6 +43,10 @@ rclient.on("auth", function() {
 
 rclient.connect();
 
+function getCommands(maininfo) {
+    
+}
+
 function checkDue() {              
     client.duePlayers(function(err, info) { // get due players list from BuyCraft API
         maininfo = info;
@@ -57,72 +60,94 @@ function checkDue() {
                 }
             } else {
                 players = maininfo.players;
-                
-                async.each(players, function (player, cb) { // if players, loop through them using async
-                    //player = players[player];    
+                playercount = players.length;
+                nextPlayer(0);
+                function nextPlayer(n) { // if players, loop through them 
+
+                    if(n >= players.length){ // done with this cycle
+                        setTimeout(checkDue, maininfo.meta.next_check * 1000);
+                        if (debug) {
+                            console.log("[DEBUG] Waiting for " + maininfo.meta.next_check + " seconds until next check.");
+                        }
+                        return;
+                    }  
+                    
+                    var player = players[n];
+                    console.log(player.name);
                     
                     query.connect(function (err) {
                         if (err) {
                             cb(err);
                         } else {     
-                            query.full_stat(function(err, stat) {
-                                if(stat.player_.indexOf(player.name) > -1) { // check if player is online
-                                    client.getOnlineCommands(player.id,function(err, online){ // get players commands
-                                        if(!err) {
-                                            if(online.commands.length !== 0) { 
-                                                commands = online.commands;
-                                                for(command in commands) {
-                                                    command = commands[command];
+                            if(maininfo.meta.execute_offline) {
+                                
+                            } else {
+                                query.full_stat(function(err, stat) {
+                                    if(stat.player_.indexOf(player.name) > -1) { // check if player is online
+                                        client.getOnlineCommands(player.id,function(err, online){ // get players commands
+                                            if(!err) {
+                                                if(online.commands.length !== 0) { 
+                                                    commands = online.commands;
+                                                    runCommands(0);
+                                                    function runCommands(i) {
 
-                                                    finalcommand = command.command;
-                                                    
-                                                    finalcommandsplit = finalcommand.split(" ");
- 
-                                                    for(finalcommandd in finalcommandsplit) { // replace doubles to integers (mc does not support doubles)
-                                                        if(!isNaN(finalcommandsplit[finalcommandd])) {
-                                                            finalcommandsplit[finalcommandd] = (Math.round(Number(finalcommandsplit[finalcommandd]))).toString(); 
+                                                        if(i >= commands.length){
+                                                            nextPlayer(n + 1);
+                                                            return;
+                                                        }                                                    
+
+                                                        finalcommand = commands[i].command;
+
+                                                        finalcommandsplit = finalcommand.split(" ");
+
+                                                        for(finalcommandd in finalcommandsplit) { // replace doubles to integers (mc does not support doubles)
+                                                            if(!isNaN(finalcommandsplit[finalcommandd])) {
+                                                                finalcommandsplit[finalcommandd] = (Math.round(Number(finalcommandsplit[finalcommandd]))).toString(); 
+                                                            }
                                                         }
+                                                        finalcommand = finalcommandsplit.join(" ");                                                   
+                                                        finalcommand = finalcommand.replace("{name}", player.name); // replace name with player name
+
+                                                        rclient.send(finalcommand); // send command to server via rcon
+                                                        console.log("[INFO] Processed command " + commands[i].id + " ( " + finalcommand + " ) by " + player.name + ".");
+                                                        client.deleteCommands([commands[i].id], function(err, bool) { // delete command from BuyCraft
+                                                            if(!err && debug) {
+                                                                console.log("[DEBUG] Deleted command.");
+                                                            }
+                                                        });
+                                                        playercount--;
+                                                        
+                                                        var b = i+1;
+                                                        if(playercount > 0) {
+                                                            setTimeout(runCommands.bind(null, i + 1), c.INTERVAL_BETWEEN_COMMAND_SENT * 1000); // set timeout for next command
+                                                        } else {                                                            
+                                                            runCommands(i + 1); // just run again to cancel
+                                                        }                                                        
                                                     }
-                                                    finalcommand = finalcommandsplit.join(" ");
-                                                    
-                                                    finalcommand = finalcommand.replace("{name}", player.name); // replace name with player name
-                                                    rclient.send(finalcommand); // send command to server via rcon
-                                                    console.log("[INFO] Processed command " + command.id + " ( " + finalcommand + " ) by " + player.name + ".");
-                                                    client.deleteCommands([command.id], function(err, bool) { // delete command from BuyCraft
-                                                        if(!err && debug) {
-                                                            console.log("[DEBUG] Deleted command.")
-                                                        }
-                                                    });
-                                                    sleep.sleep(c.INTERVAL_BETWEEN_COMMAND_SENT); //ewwww - I will get rid of this ASAP
+                                                } else {
+                                                    if(debug) {
+                                                        console.log("[DEBUG] No commands found.");
+                                                    }
+                                                    playercount--;
                                                 }
                                             } else {
-                                                if(debug) {
-                                                    console.log("[DEBUG] No commands found.");
-                                                }
-                                            }
-                                            cb();
-                                        } else {
-                                            cb(err);
-                                        }                            
-                                    });
-                                } else {
-                                    if(debug) {
-                                        console.log("[DEBUG] Player " + player.name + " is not currently online. Trying again soon...")
+                                                console.log("[ERROR] "+err);
+                                                playercount--;
+                                            }                            
+                                        });
+                                    } else {
+                                        if(debug) {
+                                            console.log("[DEBUG] Player " + player.name + " is not currently online. Trying again soon...")
+                                        }  
+                                        playercount--;
+                                        nextPlayer(n + 1);
+                                        return;
                                     }                                    
-                                    cb();
-                                }                                    
-                            });                                
+                                }); 
+                            }                                
                         }
                     }); 
-                }, function(err) { // wait for the amount of time specified by API to try again
-                    if(err) {
-                        console.log("[ERROR] "+err);
-                    }                     
-                    setTimeout(checkDue, maininfo.meta.next_check * 1000);
-                    if (debug) {
-                        console.log("[DEBUG] Waiting for " + maininfo.meta.next_check + " seconds until next check.");
-                    }                                              
-                }); 
+                }; 
                 
             }
         }
