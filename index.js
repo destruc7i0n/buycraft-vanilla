@@ -8,7 +8,7 @@ var c = require("./config.json");
 var debug = c.DEBUG;
 var client = new BuycraftAPI(c.BUYCRAFT_API_KEY);
 var rclient = new Rcon(c.MINECRAFT_SERVER_RCON_IP, c.MINECRAFT_SERVER_RCON_PORT, c.MINECRAFT_SERVER_RCON_PASSWORD); // connect to Rcon
-var rconTimeout, maininfo, players;
+var rconTimeout, maininfo, players, commands, command, finalcommand, finalcommandsplit, finalcommandd;
 
 // first check to make sure key works
 client.information(function(err, r){
