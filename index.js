@@ -14,7 +14,7 @@ var query = new Query(c.MINECRAFT_SERVER_IP, c.MINECRAFT_SERVER_PORT, { timeout:
 client.information(function(err, r){
     if(err){
         console.log("[ERROR] " + err);
-        process.exit();
+        process.exit(1);
     } else {
         checkDue();
     }
