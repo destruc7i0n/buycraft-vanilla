@@ -9,6 +9,7 @@ var debug = c.DEBUG;
 var client = new BuycraftAPI(c.BUYCRAFT_API_KEY);
 var rclient = new Rcon(c.MINECRAFT_SERVER_RCON_IP, c.MINECRAFT_SERVER_RCON_PORT, c.MINECRAFT_SERVER_RCON_PASSWORD); // connect to Rcon
 var rconTimeout, maininfo, players, commands, command, finalcommand, finalcommandsplit, finalcommandd;
+var query = new Query(c.MINECRAFT_SERVER_IP, c.MINECRAFT_SERVER_PORT, { timeout: 500 }); // query server for player list  
 
 // first check to make sure key works
 client.information(function(err, r){
@@ -43,8 +44,7 @@ rclient.on("auth", function() {
 
 rclient.connect();
 
-function checkDue() {
-    var query = new Query(c.MINECRAFT_SERVER_IP, c.MINECRAFT_SERVER_PORT, {timeout: 10000}); // query server for player list
+function checkDue() {              
     client.duePlayers(function(err, info) { // get due players list from BuyCraft API
         maininfo = info;
         if (err) {
@@ -57,9 +57,10 @@ function checkDue() {
                 }
             } else {
                 players = maininfo.players;
+                
                 async.each(players, function (player, cb) { // if players, loop through them using async
-                    //player = players[player];                    
-
+                    //player = players[player];    
+                    
                     query.connect(function (err) {
                         if (err) {
                             cb(err);
@@ -95,7 +96,7 @@ function checkDue() {
                                                     sleep.sleep(c.INTERVAL_BETWEEN_COMMAND_SENT); //ewwww - I will get rid of this ASAP
                                                 }
                                             } else {
-                                                if(debug) {
+                                                if($debug) {
                                                     console.log("[DEBUG] No commands found.");
                                                 }
                                             }
@@ -105,6 +106,9 @@ function checkDue() {
                                         }                            
                                     });
                                 } else {
+                                    if(debug) {
+                                        console.log("[DEBUG] Player " + player.name + " is not currently online. Trying again soon...")
+                                    }                                    
                                     cb();
                                 }                                    
                             });                                
@@ -112,17 +116,12 @@ function checkDue() {
                     }); 
                 }, function(err) { // wait for the amount of time specified by API to try again
                     if(err) {
-                        setTimeout(checkDue, maininfo.meta.next_check * 1000);
                         console.log("[ERROR] "+err);
-                        if (debug) {
-                            console.log("[DEBUG] Waiting for " + maininfo.meta.next_check + " seconds until next check.");
-                        } 
-                    } else {
-                        setTimeout(checkDue, maininfo.meta.next_check * 1000);
-                        if (debug) {
-                            console.log("[DEBUG] Waiting for " + maininfo.meta.next_check + " seconds until next check. Executed commands for " + maininfo.players.length +  " players.");
-                        }                         
                     }                     
+                    setTimeout(checkDue, maininfo.meta.next_check * 1000);
+                    if (debug) {
+                        console.log("[DEBUG] Waiting for " + maininfo.meta.next_check + " seconds until next check.");
+                    }                                              
                 }); 
                 
             }
