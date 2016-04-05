@@ -9,11 +9,9 @@
   "author": "destruc7i0n",
   "license": "ISC",
   "dependencies": {
-    "async": "^2.0.0-rc.2",
     "buycraft-js": "0.0.1",
     "mcquery": "0.2.5",
-    "rcon": "^1.0.2",
-    "sleep": "3.0.1"
+    "rcon": "^1.0.2"
   },
   "devDependencies": {},
   "repository": {
