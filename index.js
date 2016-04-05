@@ -104,6 +104,8 @@ function checkDue() {
                                             cb(err);
                                         }                            
                                     });
+                                } else {
+                                    cb();
                                 }                                    
                             });                                
                         }
