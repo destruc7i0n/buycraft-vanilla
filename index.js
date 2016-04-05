@@ -43,10 +43,6 @@ rclient.on("auth", function() {
 
 rclient.connect();
 
-function getCommands(maininfo) {
-    
-}
-
 function checkDue() {              
     client.duePlayers(function(err, info) { // get due players list from BuyCraft API
         maininfo = info;
