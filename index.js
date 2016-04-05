@@ -96,7 +96,7 @@ function checkDue() {
                                                     sleep.sleep(c.INTERVAL_BETWEEN_COMMAND_SENT); //ewwww - I will get rid of this ASAP
                                                 }
                                             } else {
-                                                if($debug) {
+                                                if(debug) {
                                                     console.log("[DEBUG] No commands found.");
                                                 }
                                             }
