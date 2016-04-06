@@ -73,10 +73,13 @@ function checkDue() {
                     
                     query.connect(function (err) {
                         if (err) {
-                            cb(err);
+                            console.log("[ERROR] "+err);
+                            playercount--;
+                            nextPlayer(n+1);
+                            return;
                         } else {     
                             if(maininfo.meta.execute_offline) {
-                                
+                                // todo
                             } else {
                                 query.full_stat(function(err, stat) {
                                     if(stat.player_.indexOf(player.name) > -1) { // check if player is online
