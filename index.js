@@ -1,154 +1,131 @@
 "use strict";
 var BuycraftAPI = require("buycraft-js");
-var Query = require("mcquery");
-var Rcon = require("rcon");
-
+var Rcon = require("./rcon.js");
 var c = require("./config.json");
 var debug = c.DEBUG;
-var client = new BuycraftAPI(c.BUYCRAFT_API_KEY);
-var rclient = new Rcon(c.MINECRAFT_SERVER_RCON_IP, c.MINECRAFT_SERVER_RCON_PORT, c.MINECRAFT_SERVER_RCON_PASSWORD); // connect to Rcon
-var rconTimeout, maininfo, players, playercount, commands, command, finalcommand, finalcommandsplit, finalcommandd;
-var query = new Query(c.MINECRAFT_SERVER_IP, c.MINECRAFT_SERVER_PORT, { timeout: 500 }); // query server for player list  
+var client = new BuycraftAPI(c.BUYCRAFT_API_KEY); // connect to BuyCraft
+var rclient = new Rcon(c.MINECRAFT_SERVER_RCON_IP, c.MINECRAFT_SERVER_RCON_PORT); // connect to Rcon
+var maininfo, player, players, onlineplayers, playercount, commands, command, commandcount, finalcommand, finalcommandsplit, finalcommandd;
 
 // first check to make sure key works
-client.information(function(err, r){
-    if(err){
+client.information(function(err, r) {
+    if(err) {
         console.log("[ERROR] " + err);
         process.exit(1);
     } else {
-        checkDue();
+        rclient.auth(c.MINECRAFT_SERVER_RCON_PASSWORD, function(err){
+            checkDue();
+        });
     }
 });
 
-rclient.on("auth", function() {
-    console.log("[INFO] Authenticated with " + c.MINECRAFT_SERVER_RCON_IP + ":" + c.MINECRAFT_SERVER_RCON_PORT);
-}).on("response", function(str) {
-    if (debug && str) {
-        console.log("[DEBUG] Got response: " + str);
-    }
-}).on("end", function() {
-    console.log("[INFO] Rcon closed!");
-}).on("error", function() { // rcon reconnect - thanks to Secret_Online
-    if (typeof rconTimeout === 'undefined') {
-        rclient.disconnect();
-        if(debug) {
-            console.log("[DEBUG] Trying to reconnect again in " + c.RCON_RECONNECT_DELAY + " seconds...");
-        }        
-        rconTimeout = setTimeout(function() {
-            rclient.connect();
-            rconTimeout = undefined;
-        }, c.RCON_RECONNECT_DELAY * 1000);
-    }
-});
-
-rclient.connect();
-
-function checkDue() {              
+function checkDue() {
     client.duePlayers(function(err, info) { // get due players list from BuyCraft API
         maininfo = info;
-        if (err) {
+        if(err) {
             console.log("[ERROR] Got error: " + err);
         } else {
             if(maininfo.players.length == 0) { // if no players, wait for the amount of time specified in API
                 setTimeout(checkDue, maininfo.meta.next_check * 1000);
-                if (debug) {
-                    console.log("[DEBUG] Waiting for " + maininfo.meta.next_check + " seconds until next check.");
+                if(debug) {
+                    console.log("[DEBUG] Waiting for " + maininfo.meta.next_check + " seconds (" + + Math.floor(maininfo.meta.next_check / 60) + " minutes) until next check.");
                 }
             } else {
-                players = maininfo.players;
-                playercount = players.length;
-                nextPlayer(0);
-                function nextPlayer(n) { // if players, loop through them 
+                players = maininfo.players;                
+                onlineplayers = [];
 
-                    if(n >= players.length){ // done with this cycle
-                        setTimeout(checkDue, maininfo.meta.next_check * 1000);
-                        if (debug) {
-                            console.log("[DEBUG] Waiting for " + maininfo.meta.next_check + " seconds until next check.");
+                rclient.command("list", function(err, resp){ // check if all players are online
+                    for(player in players) {
+                        player = players[player];
+                        if(resp.indexOf(player.name) == -1) {
+                            if (debug) {
+                                console.log("[DEBUG] Player " + player.name + " is not currently online. Trying again soon...");
+                            }
+                        } else {
+                            onlineplayers.push(player); // if player online, add to array
                         }
-                        return;
-                    }  
+                    }
                     
-                    var player = players[n];
-                    console.log(player.name);
+                    players = onlineplayers;
+                    playercount = players.length;
+                    nextPlayer(0);
                     
-                    query.connect(function (err) {
-                        if (err) {
-                            console.log("[ERROR] "+err);
-                            playercount--;
-                            nextPlayer(n+1);
+                    function nextPlayer(n) { // if players online, loop through them 
+                        if(n >= players.length) { // done with this cycle
+                            setTimeout(checkDue, maininfo.meta.next_check * 1000);
+                            if(debug) {
+                                console.log("[DEBUG] Waiting for " + maininfo.meta.next_check + " seconds (" + + Math.floor(maininfo.meta.next_check / 60) + " minutes) until next check.");
+                            }
                             return;
-                        } else {     
-                            if(maininfo.meta.execute_offline) {
-                                // todo
-                            } else {
-                                query.full_stat(function(err, stat) {
-                                    if(stat.player_.indexOf(player.name) > -1) { // check if player is online
-                                        client.getOnlineCommands(player.id,function(err, online){ // get players commands
-                                            if(!err) {
-                                                if(online.commands.length !== 0) { 
-                                                    commands = online.commands;
-                                                    runCommands(0);
-                                                    function runCommands(i) {
+                        }
+                        var player = players[n];
 
-                                                        if(i >= commands.length){
-                                                            nextPlayer(n + 1);
-                                                            return;
-                                                        }                                                    
+                        function runLoop() {
+                            client.getOnlineCommands(player.id, function(err, online) { // get players' commands
+                                if(!err) {
+                                    if(online.commands.length !== 0) {
+                                        commands = online.commands;
+                                        commandcount = commands.length;
+                                        runCommands(0);
 
-                                                        finalcommand = commands[i].command;
-
-                                                        finalcommandsplit = finalcommand.split(" ");
-
-                                                        for(finalcommandd in finalcommandsplit) { // replace doubles to integers (mc does not support doubles)
-                                                            if(!isNaN(finalcommandsplit[finalcommandd])) {
-                                                                finalcommandsplit[finalcommandd] = (Math.round(Number(finalcommandsplit[finalcommandd]))).toString(); 
-                                                            }
-                                                        }
-                                                        finalcommand = finalcommandsplit.join(" ");                                                   
-                                                        finalcommand = finalcommand.replace("{name}", player.name); // replace name with player name
-
-                                                        rclient.send(finalcommand); // send command to server via rcon
-                                                        console.log("[INFO] Processed command " + commands[i].id + " ( " + finalcommand + " ) by " + player.name + ".");
-                                                        client.deleteCommands([commands[i].id], function(err, bool) { // delete command from BuyCraft
-                                                            if(!err && debug) {
-                                                                console.log("[DEBUG] Deleted command.");
-                                                            }
-                                                        });
-                                                        playercount--;
-                                                        
-                                                        var b = i+1;
-                                                        if(playercount > 0) {
-                                                            setTimeout(runCommands.bind(null, i + 1), c.INTERVAL_BETWEEN_COMMAND_SENT * 1000); // set timeout for next command
-                                                        } else {                                                            
-                                                            runCommands(i + 1); // just run again to cancel
-                                                        }                                                        
-                                                    }
-                                                } else {
-                                                    if(debug) {
-                                                        console.log("[DEBUG] No commands found.");
-                                                    }
-                                                    playercount--;
+                                        function runCommands(i) {
+                                            if(i >= commands.length) {
+                                                nextPlayer(n + 1);
+                                                return;
+                                            }
+                                            finalcommand = commands[i].command;
+                                            finalcommandsplit = finalcommand.split(" ");
+                                            for(finalcommandd in finalcommandsplit) { // replace doubles to integers (mc does not support doubles)
+                                                if(!isNaN(finalcommandsplit[finalcommandd])) {
+                                                    finalcommandsplit[finalcommandd] = (Math.round(Number(finalcommandsplit[finalcommandd]))).toString();
                                                 }
-                                            } else {
-                                                console.log("[ERROR] "+err);
-                                                playercount--;
-                                            }                            
-                                        });
+                                            }
+                                            finalcommand = finalcommandsplit.join(" ");
+                                            finalcommand = finalcommand.replace("{name}", player.name); // replace name with player name
+
+                                            rclient.command(finalcommand, function(err, resp) {
+                                                console.log("[INFO] Processed command " + commands[i].id + " ( " + finalcommand + " ) by " + player.name + ".");
+                                                client.deleteCommands([commands[i].id], function(err, bool) { // delete command from BuyCraft
+                                                    if(!err && debug) {
+                                                        console.log("[DEBUG] Deleted command "+commands[i].id+".");
+                                                    }
+                                                    
+                                                    commandcount--;
+                                                    
+                                                    if(commandcount == 0) { // if no more commands, remove one from the amount of players left to iterate over
+                                                        playercount--;
+                                                    }                                                                                                        
+                                                    
+                                                    if(commandcount > 0) {
+                                                        setTimeout(runCommands.bind(null, i + 1), c.INTERVAL_BETWEEN_COMMAND_SENT * 1000); // set timeout for next command
+                                                    } else {
+                                                        runCommands(i + 1); // just run again to cancel
+                                                    }
+
+                                                });                                             
+                                            }); // send command to server via rcon
+                                        }
                                     } else {
                                         if(debug) {
-                                            console.log("[DEBUG] Player " + player.name + " is not currently online. Trying again soon...")
-                                        }  
-                                        playercount--;
-                                        nextPlayer(n + 1);
-                                        return;
-                                    }                                    
-                                }); 
-                            }                                
+                                            console.log("[DEBUG] No commands found."); // this should never happen
+                                        }
+                                    }
+                                } else {
+                                    console.log("[ERROR] " + err);
+                                }
+                            });
                         }
-                    }); 
-                }; 
+
+                        if(playercount > 0 && playercount !== players.length) { // make sure not first command to be executed and there is more than one player
+                            setTimeout(runLoop, c.INTERVAL_BETWEEN_COMMAND_SENT * 1000); // set timeout for next command
+                        } else {
+                            runLoop(); // just run again to cancel
+                        }
+
+                    };                    
+                });                    
                 
             }
         }
     });
-}     
+}
