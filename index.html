@@ -41,8 +41,6 @@
 <pre><code>enable-rcon=true
 rcon.password=&lt;your password&gt;
 rcon.port=&lt;1-65535&gt;
-enable-query=true
-query.port=&lt;1-65535&gt;
 </code></pre>
 
 <p>Clone repository onto a server, edit <code>config.json</code> (see below for more info) and change any options, and then, in the repository folder:</p>
@@ -59,18 +57,13 @@ $ node index.js</pre></div>
     <span class="pl-s"><span class="pl-pds">"</span>MINECRAFT_SERVER_RCON_IP<span class="pl-pds">"</span></span><span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">"</span>example.com<span class="pl-pds">"</span></span>, <span class="pl-c">/* minecraft server ip (make sure you have enabled rcon) */</span>
     <span class="pl-s"><span class="pl-pds">"</span>MINECRAFT_SERVER_RCON_PORT<span class="pl-pds">"</span></span><span class="pl-k">:</span> <span class="pl-k">&lt;</span><span class="pl-c1">1</span><span class="pl-k">-</span><span class="pl-c1">65535</span><span class="pl-k">&gt;</span>, <span class="pl-c">/* minecraft server rcon port */</span>
     <span class="pl-s"><span class="pl-pds">"</span>MINECRAFT_SERVER_RCON_PASSWORD<span class="pl-pds">"</span></span><span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">"</span>&lt;your password&gt;<span class="pl-pds">"</span></span>, <span class="pl-c">/* minecraft server rcon password */</span>
-    <span class="pl-s"><span class="pl-pds">"</span>MINECRAFT_SERVER_IP<span class="pl-pds">"</span></span><span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">"</span>example.com<span class="pl-pds">"</span></span>, <span class="pl-c">/* minecraft server ip (not rcon) */</span>
-    <span class="pl-s"><span class="pl-pds">"</span>MINECRAFT_SERVER_PORT<span class="pl-pds">"</span></span><span class="pl-k">:</span> <span class="pl-c1">25565</span>, <span class="pl-c">/* minecraft server port (no rcon) */</span>
-    <span class="pl-s"><span class="pl-pds">"</span>RCON_RECONNECT_DELAY<span class="pl-pds">"</span></span><span class="pl-k">:</span> <span class="pl-c1">10</span>, <span class="pl-c">/* how many seconds before trying to reconnect to rcon */</span>
     <span class="pl-s"><span class="pl-pds">"</span>DEBUG<span class="pl-pds">"</span></span><span class="pl-k">:</span> <span class="pl-c1">true</span> <span class="pl-c">/* dev debugging */</span>
 }</pre></div>
 
 <h2>
 <a id="upcoming" class="anchor" href="#upcoming" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Upcoming</h2>
 
-<ul>
-<li>Removal of <code>sleep</code> package</li>
-</ul>
+<p>None.</p>
 
 <h2>
 <a id="suggestions" class="anchor" href="#suggestions" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Suggestions</h2>
@@ -84,7 +77,9 @@ $ node index.js</pre></div>
 <li>
 <a href="https://github.com/minecrafter">minecrafter</a> for buycraft-js</li>
 <li>
-<a href="https://github.com/secretonline">SecretOnline</a> for Rcon reconnecting</li>
+<a href="https://github.com/secretonline">SecretOnline</a> for Rcon reconnecting </li>
+<li>
+<a href="https://github.com/M4GNV5">M4GNV5</a> for various optimizations and the improved Rcon lib</li>
 </ul>
 
 <h2>
