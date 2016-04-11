@@ -1,6 +1,6 @@
 {
   "name": "buycraft",
-  "version": "1.0.0",
+  "version": "1.9.0",
   "description": "An integration of the BuyCraft API with Vanilla Minecraft Servers using Node.js",
   "main": "index.js",
   "scripts": {
@@ -9,9 +9,7 @@
   "author": "destruc7i0n",
   "license": "ISC",
   "dependencies": {
-    "buycraft-js": "0.0.1",
-    "mcquery": "0.2.5",
-    "rcon": "^1.0.2"
+    "buycraft-js": "0.0.1"
   },
   "devDependencies": {},
   "repository": {
