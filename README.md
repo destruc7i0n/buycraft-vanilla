@@ -8,8 +8,6 @@ In your Minecraft server.properties, make sure you have:
 enable-rcon=true
 rcon.password=<your password>
 rcon.port=<1-65535>
-enable-query=true
-query.port=<1-65535>
 ```
 
 Clone repository onto a server, edit ```config.json``` (see below for more info) and change any options, and then, in the repository folder:
