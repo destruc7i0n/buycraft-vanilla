@@ -28,20 +28,20 @@ $ node index.js
     "MINECRAFT_SERVER_RCON_PASSWORD": "<your password>", /* minecraft server rcon password */
     "MINECRAFT_SERVER_IP": "example.com", /* minecraft server ip (not rcon) */
     "MINECRAFT_SERVER_PORT": 25565, /* minecraft server port (no rcon) */
-    "RCON_RECONNECT_DELAY": 10, /* how many seconds before trying to reconnect to rcon */
     "DEBUG": true /* dev debugging */
 }
 ```
 
 ## Upcoming
-* Removal of `sleep` package
+None.
 
 ## Suggestions
 If you have any suggestions or feature requests, feel free to add an issue and I will take a look and possibly add it to the "Upcoming" section!
 
 ## Thanks
 * [minecrafter](https://github.com/minecrafter) for buycraft-js
-* [SecretOnline](https://github.com/secretonline) for Rcon reconnecting
+* [SecretOnline](https://github.com/secretonline) for Rcon reconnecting 
+* [M4GNV5](https://github.com/M4GNV5) for various optimizations and the improved Rcon lib
 
 ## License
 
