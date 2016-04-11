@@ -41,4 +41,4 @@ If you have any suggestions or feature requests, feel free to add an issue and I
 
 ## License
 
-ISC. See `LICENSE`.
+MIT. See `LICENSE`.
