@@ -17,7 +17,7 @@ $ node index.js
 ```
 
 ### Configuration
-```json
+```js
 {
     "BUYCRAFT_API_KEY": "1234", /* Your BuyCraft API Key */
     "INTERVAL_BETWEEN_COMMAND_SENT": 10, /* interval between each command is sent to server */
