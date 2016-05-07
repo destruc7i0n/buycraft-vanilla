@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+
+logfile=$PWD/buycraft.log
+pidfile=$PWD/buycraft.pid
+
+PATH=${PWD}/node/bin:$PATH
+if [ ! -d node ]; then
+    echo "Downloading Node"
+    curl -o node.tar.gz https://nodejs.org/dist/v4.4.4/node-v4.4.4-linux-x64.tar.gz
+    tar -xf node.tar.gz
+    rm -f node.tar.gz
+    mv node-* node
+fi
+
+start() {
+    if [ ! -d "node_modules" ]; then
+        echo "Please run 'buycraft install' first"
+        exit 1
+    fi
+    if [ "$pid" == "" ]; then
+        echo "Starting buycraft"
+        touch $pidfile
+        touch $logfile
+
+        forever start --pidFile $pidfile -a -l $logfile -d $PWD/index.js > /dev/null
+        echo "Buycraft started"
+    else
+        echo -e "\nBuycraft is already running\n"                
+    fi
+}
+
+stop() {
+    echo "Shutting down buycraft"
+    if [ "$pid" != "" ]; then
+        forever stop $pid > /dev/null
+        echo "Buycraft shut down"
+    else
+        echo -e "\nBuycraft is not running";
+    fi
+}
+
+if [ -f $pidfile ]; then
+      read pid < $pidfile
+else
+      pid=""
+fi
+
+case "$1" in 
+    install)
+        npm install > /dev/null
+        npm install forever -g > /dev/null
+        ;;            
+    start)
+        start
+        ;;
+    stop)
+        stop
+        ;;
+    *)
+        echo "Usage: {install|start|stop}"
+        exit 1
+        ;;
+esac 
+exit 0
