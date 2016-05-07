@@ -10,8 +10,9 @@ rcon.password=<your password>
 rcon.port=<1-65535>
 ```
 
-Clone repository onto a server, edit ```config.json``` (see below for more info) and change any options, and then, in the repository folder:
+Clone repository onto a server (or download [this](https://github.com/destruc7i0n/buycraft-vanilla/archive/master.zip) onto the server), edit ```config.json``` (see "Configuration" for more info) and change the options, and then, in the repository folder:
 ```sh
+$ cd buycraft-vanilla
 $ chmod +x buycraft
 $ ./buycraft install
 $ ./buycraft start
@@ -21,6 +22,8 @@ Then to stop:
 ```sh
 $ ./buycraft stop
 ```
+
+The log will be at `buycraft.log`, be sure to look at it if something goes wrong.
 
 ### Configuration
 ```js
