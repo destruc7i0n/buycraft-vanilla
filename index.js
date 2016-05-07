@@ -1,23 +1,30 @@
 "use strict";
 var BuycraftAPI = require("buycraft-js");
 var Rcon = require("./rcon.js");
+var util = require("./util.js");
 var c = require("./config.json");
 var debug = c.DEBUG;
 var client = new BuycraftAPI(c.BUYCRAFT_API_KEY); // connect to BuyCraft
 var rclient = new Rcon(c.MINECRAFT_SERVER_RCON_IP, c.MINECRAFT_SERVER_RCON_PORT); // connect to Rcon
-var maininfo, player, players, onlineplayers, playercount, commands, command, commandcount, finalcommand, finalcommandsplit, finalcommandd;
+var maininfo, player, players, onlineplayers, playercount, commands, command, commandcount, finalcommand, finalcommandsplit, finalcommandd, resp;
 
-// first check to make sure key works
-client.information(function(err, r) {
+util.versionCheck(function(err, ver){
     if(err) {
-        console.log("[ERROR] " + err);
+        console.log(err.message);
         process.exit(1);
-    } else {
-        rclient.auth(c.MINECRAFT_SERVER_RCON_PASSWORD, function(err){
-            checkDue();
-        });
     }
-});
+    // make sure buycraft key works
+    client.information(function(err, r) {
+        if(err) {
+            console.log("[ERROR] " + err);
+            process.exit(1);
+        } else {
+            rclient.auth(c.MINECRAFT_SERVER_RCON_PASSWORD, function(err){
+                checkDue();
+            });
+        }
+    });    
+}); // firstly, check the version
 
 function checkDue() {
     client.duePlayers(function(err, info) { // get due players list from BuyCraft API
@@ -28,7 +35,7 @@ function checkDue() {
             if(maininfo.players.length == 0) { // if no players, wait for the amount of time specified in API
                 setTimeout(checkDue, maininfo.meta.next_check * 1000);
                 if(debug) {
-                    console.log("[DEBUG] Waiting for " + maininfo.meta.next_check + " seconds (" + + Math.floor(maininfo.meta.next_check / 60) + " minutes) until next check.");
+                    console.log("[DEBUG] Waiting for " + maininfo.meta.next_check + " seconds (" + util.StoMin(maininfo.meta.next_check) + " minutes) until next check.");
                 }
             } else {
                 players = maininfo.players;                
@@ -54,7 +61,7 @@ function checkDue() {
                         if(n >= players.length) { // done with this cycle
                             setTimeout(checkDue, maininfo.meta.next_check * 1000);
                             if(debug) {
-                                console.log("[DEBUG] Waiting for " + maininfo.meta.next_check + " seconds (" + + Math.floor(maininfo.meta.next_check / 60) + " minutes) until next check.");
+                                console.log("[DEBUG] Waiting for " + maininfo.meta.next_check + " seconds (" + util.StoMin(maininfo.meta.next_check) + " minutes) until next check.");
                             }
                             return;
                         }
@@ -73,14 +80,7 @@ function checkDue() {
                                                 nextPlayer(n + 1);
                                                 return;
                                             }
-                                            finalcommand = commands[i].command;
-                                            finalcommandsplit = finalcommand.split(" ");
-                                            for(finalcommandd in finalcommandsplit) { // replace doubles to integers (mc does not support doubles)
-                                                if(!isNaN(finalcommandsplit[finalcommandd])) {
-                                                    finalcommandsplit[finalcommandd] = (Math.round(Number(finalcommandsplit[finalcommandd]))).toString();
-                                                }
-                                            }
-                                            finalcommand = finalcommandsplit.join(" ");
+                                            finalcommand = util.removeDoubles(commands[i].command);
                                             finalcommand = finalcommand.replace("{name}", player.name); // replace name with player name
 
                                             rclient.command(finalcommand, function(err, resp) {
