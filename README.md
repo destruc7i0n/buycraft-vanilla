@@ -26,7 +26,7 @@ $ ./buycraft stop
 The log will be at `buycraft.log`, be sure to look at it if something goes wrong.
 
 ### Configuration
-```js
+```json
 {
     "BUYCRAFT_API_KEY": "1234", /* Your BuyCraft API Key */
     "INTERVAL_BETWEEN_COMMAND_SENT": 10, /* interval between each command is sent to server */
