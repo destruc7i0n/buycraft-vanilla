@@ -12,8 +12,14 @@ rcon.port=<1-65535>
 
 Clone repository onto a server, edit ```config.json``` (see below for more info) and change any options, and then, in the repository folder:
 ```sh
-$ npm install
-$ node index.js
+$ chmod +x buycraft
+$ ./buycraft install
+$ ./buycraft start
+```
+
+Then to stop: 
+```sh
+$ ./buycraft stop
 ```
 
 ### Configuration
