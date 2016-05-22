@@ -1,6 +1,7 @@
 var version = "1.0.0"; // the plugin version
 
 var request = require("superagent");
+var c = require("./config.json");
 
 exports.versionCheck = function(callback) {
     request.get("https://plugin.buycraft.net/versions/vanilla")
@@ -29,4 +30,19 @@ exports.removeDoubles = function(str) { // replace doubles to integers (mc does 
         }
     }
     return strsplit.join(" ");    
+}
+
+exports.getOnlinePlayers = function(playerString, players) {
+    var onlineplayers = [];
+    for(player in players) {
+        player = players[player];
+        if(playerString.indexOf(player.name) == -1) {
+            if (c.DEBUG) {
+                console.log("[DEBUG] Player " + player.name + " is not currently online. Trying again soon...");
+            }
+        } else {
+            onlineplayers.push(player); // if player online, add to array
+        }
+    }
+    return onlineplayers;
 }
