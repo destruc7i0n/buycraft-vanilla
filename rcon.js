@@ -37,7 +37,9 @@ function Rcon(ip, port)
         }
     }).on("end", function()
     {
-        console.log("[INFO] Rcon closed!");
+        if(debug) {
+            console.log("[DEBUG] Rcon closed!");
+        }
     });
 }
 Rcon.timeout = 5000;
