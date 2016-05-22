@@ -9,7 +9,8 @@
   "author": "destruc7i0n",
   "license": "ISC",
   "dependencies": {
-    "buycraft-js": "0.0.1"
+    "buycraft-js": "0.0.1",
+    "superagent": "^2.0.0-alpha.3"
   },
   "devDependencies": {},
   "repository": {
