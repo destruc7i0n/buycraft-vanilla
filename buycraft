@@ -56,8 +56,14 @@ case "$1" in
     stop)
         stop
         ;;
+    restart)
+        stop
+        start
+        ;;
+    logs)
+        tail -f $logfile
     *)
-        echo "Usage: {install|start|stop}"
+        echo "Usage: {install|start|stop|restart|logs}"
         exit 1
         ;;
 esac 
