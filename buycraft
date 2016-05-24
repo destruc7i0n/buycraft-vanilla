@@ -3,18 +3,9 @@
 logfile=$PWD/buycraft.log
 pidfile=$PWD/buycraft.pid
 
-PATH=${PWD}/node/bin:$PATH
-if [ ! -d node ]; then
-    echo "Downloading Node"
-    curl -o node.tar.gz https://nodejs.org/dist/v4.4.4/node-v4.4.4-linux-x64.tar.gz
-    tar -xf node.tar.gz
-    rm -f node.tar.gz
-    mv node-* node
-fi
-
 start() {
     if [ ! -d "node_modules" ]; then
-        echo "Please run 'buycraft install' first"
+        echo "Please run './install.sh' first"
         exit 1
     fi
     if [ "$pid" == "" ]; then
@@ -45,11 +36,7 @@ else
       pid=""
 fi
 
-case "$1" in 
-    install)
-        npm install > /dev/null
-        npm install forever -g > /dev/null
-        ;;            
+case "$1" in            
     start)
         start
         ;;
@@ -62,8 +49,9 @@ case "$1" in
         ;;
     logs)
         tail -f $logfile
+        ;;
     *)
-        echo "Usage: {install|start|stop|restart|logs}"
+        echo "Usage: {start|stop|restart|logs}"
         exit 1
         ;;
 esac 
