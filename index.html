@@ -43,13 +43,23 @@ rcon.password=&lt;your password&gt;
 rcon.port=&lt;1-65535&gt;
 </code></pre>
 
-<p>Clone repository onto a server, edit <code>config.json</code> (see below for more info) and change any options, and then, in the repository folder:</p>
+<p>Clone repository onto a server (or download <a href="https://github.com/destruc7i0n/buycraft-vanilla/archive/master.zip">this</a> onto the server), edit <code>config.json</code> (see "Configuration" for more info) and change the options, and then, in the repository folder:</p>
 
-<div class="highlight highlight-source-shell"><pre>$ npm install
-$ node index.js</pre></div>
+<div class="highlight highlight-source-shell"><pre>$ <span class="pl-c1">cd</span> buycraft-vanilla
+$ chmod +x buycraft install.sh
+$ ./install.sh
+$ ./buycraft start</pre></div>
+
+<p>Then to stop: </p>
+
+<div class="highlight highlight-source-shell"><pre>$ ./buycraft stop</pre></div>
+
+<p>The log will be at <code>buycraft.log</code>, be sure to look at it if something goes wrong.</p>
 
 <h3>
 <a id="configuration" class="anchor" href="#configuration" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Configuration</h3>
+
+<p>This file will be auto generated for you by <code>install.sh</code></p>
 
 <div class="highlight highlight-source-js"><pre>{
     <span class="pl-s"><span class="pl-pds">"</span>BUYCRAFT_API_KEY<span class="pl-pds">"</span></span><span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">"</span>1234<span class="pl-pds">"</span></span>, <span class="pl-c">/* Your BuyCraft API Key */</span>
@@ -57,7 +67,7 @@ $ node index.js</pre></div>
     <span class="pl-s"><span class="pl-pds">"</span>MINECRAFT_SERVER_RCON_IP<span class="pl-pds">"</span></span><span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">"</span>example.com<span class="pl-pds">"</span></span>, <span class="pl-c">/* minecraft server ip (make sure you have enabled rcon) */</span>
     <span class="pl-s"><span class="pl-pds">"</span>MINECRAFT_SERVER_RCON_PORT<span class="pl-pds">"</span></span><span class="pl-k">:</span> <span class="pl-k">&lt;</span><span class="pl-c1">1</span><span class="pl-k">-</span><span class="pl-c1">65535</span><span class="pl-k">&gt;</span>, <span class="pl-c">/* minecraft server rcon port */</span>
     <span class="pl-s"><span class="pl-pds">"</span>MINECRAFT_SERVER_RCON_PASSWORD<span class="pl-pds">"</span></span><span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">"</span>&lt;your password&gt;<span class="pl-pds">"</span></span>, <span class="pl-c">/* minecraft server rcon password */</span>
-    <span class="pl-s"><span class="pl-pds">"</span>DEBUG<span class="pl-pds">"</span></span><span class="pl-k">:</span> <span class="pl-c1">true</span> <span class="pl-c">/* dev debugging */</span>
+    <span class="pl-s"><span class="pl-pds">"</span>DEBUG<span class="pl-pds">"</span></span><span class="pl-k">:</span> <span class="pl-c1">false</span> <span class="pl-c">/* dev debugging */</span>
 }</pre></div>
 
 <h2>
@@ -85,7 +95,7 @@ $ node index.js</pre></div>
 <h2>
 <a id="license" class="anchor" href="#license" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>License</h2>
 
-<p>ISC. See <code>LICENSE</code>.</p>
+<p>MIT. See <code>LICENSE</code>.</p>
       </section>
       <footer>
         <p>This project is maintained by <a href="https://github.com/destruc7i0n">destruc7i0n</a></p>
