@@ -45,6 +45,7 @@ case "$1" in
         ;;
     restart)
         stop
+        pid=""
         start
         ;;
     logs)
