@@ -39,15 +39,6 @@ printSeparator
 
 json=$(printf '{"BUYCRAFT_API_KEY":"%s", "INTERVAL_BETWEEN_COMMAND_SENT": 10, "MINECRAFT_SERVER_RCON_IP": "%s", "MINECRAFT_SERVER_RCON_PORT": %i, "MINECRAFT_SERVER_RCON_PASSWORD": "%s"}\n' "$secretKey" "$rconIP" $rconPort "$rconPass")
 
-PATH=${PWD}/node/bin:$PATH
-if [ ! -d node ]; then
-    echo "Downloading Node..."
-    curl -o node.tar.gz https://nodejs.org/dist/v4.4.4/node-v4.4.4-linux-x64.tar.gz
-    tar -xf node.tar.gz
-    rm -f node.tar.gz
-    mv node-* node
-fi
-
 if [ ! -d "node_modules" ]; then
     echo "Installing node modules..."
     npm install
