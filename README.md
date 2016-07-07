@@ -10,6 +10,13 @@ rcon.password=<your password>
 rcon.port=<1-65535>
 ```
 
+now install Node.js (For more details please visit [nvm](https://github.com/creationix/nvm))
+```
+curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.31.2/install.sh | bash
+source ~/.bashrc
+nvm install 4.4.7
+```
+
 Clone repository onto a server (or download [this](https://github.com/destruc7i0n/buycraft-vanilla/archive/master.zip) onto the server), edit ```config.json``` (see "Configuration" for more info) and change the options, and then, in the repository folder:
 ```sh
 $ cd buycraft-vanilla
