@@ -7,6 +7,11 @@ function printSeparator() {
     echo "------------"
 }
 
+if [ "$(id -u)" != "0" ]; then
+   echo "This script must be run as root" 1>&2
+   exit 1    
+fi
+
 printSeparator
 echo "Thank you for using the BuyCraft Vanilla installer!"
 echo "Before we can complete the installation, we need to ask you some questions"
@@ -45,8 +50,8 @@ fi
 
 if [ ! -d "node_modules" ]; then
     echo "Installing node modules..."
-    sudo npm install
-    sudo npm install forever -g
+    npm install
+    npm install forever -g
 fi
 
 echo "Writing config to file..."
