@@ -7,9 +7,9 @@ function printSeparator() {
     echo "------------"
 }
 
-if [ "$(id -u)" != "0" ]; then
-   echo "This script must be run as root" 1>&2
-   exit 1    
+if [ ! which node > /dev/null ]; then 
+    echo "Please follow the instructions in README to install node first"
+    exit 1
 fi
 
 printSeparator
