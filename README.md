@@ -21,7 +21,7 @@ Clone repository onto a server (or download [this](https://github.com/destruc7i0
 ```sh
 $ cd buycraft-vanilla
 $ chmod +x buycraft install.sh
-$ ./install.sh
+$ sudo ./install.sh
 $ ./buycraft start
 ```
 

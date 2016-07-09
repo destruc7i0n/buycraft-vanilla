@@ -1,7 +1,7 @@
 "use strict";
 var BuycraftAPI = require("buycraft-js");
-var Rcon = require("./rcon.js");
-var util = require("./util.js");
+var Rcon = require("./lib/rcon.js");
+var util = require("./lib/util.js");
 var c = require("./config.json");
 var debug = c.DEBUG;
 var client = new BuycraftAPI(c.BUYCRAFT_API_KEY); // connect to BuyCraft
@@ -24,6 +24,52 @@ util.versionCheck(function(err, ver){
 }); // firstly, check the version
 
 function checkDue() {
+
+    client.getOfflineCommands(function(err, cmds) {
+        if(!err) {
+            if(cmds.commands.length !== 0) {
+                var rclient = new Rcon(c.MINECRAFT_SERVER_RCON_IP, c.MINECRAFT_SERVER_RCON_PORT); // create rcon client
+
+                rclient.auth(c.MINECRAFT_SERVER_RCON_PASSWORD, function(err){ // only authenticate when needed                  
+                    commands = cmds.commands;
+                    commandcount = commands.length;
+                    runCommands(0);
+
+                    function runCommands(i) {
+                        var thisCommand = commands[i];
+                        if(i >= commands.length) {
+                            return;
+                        }                    
+                        finalcommand = util.removeDoubles(thisCommand.command);
+                        rclient.command(finalcommand, function(err, resp) {
+                            console.log("[INFO] Processed command " + thisCommand.id + " ( " + finalcommand + " ) by " + thisCommand.player.name + ".");
+                            client.deleteCommands([thisCommand.id], function(err, bool) { // delete command from BuyCraft
+                                if(!err && debug) {
+                                    console.log("[DEBUG] Deleted command "+thisCommand.id+".");
+                                }
+
+                                commandcount--;
+
+                                if(commandcount == 0) { // if no more commands, remove one from the amount of players left to iterate over
+                                    playercount--;
+                                }                                                                                                        
+
+                                if(commandcount > 0) {
+                                    setTimeout(runCommands.bind(null, i + 1), c.INTERVAL_BETWEEN_COMMAND_SENT * 1000 + thisCommand.conditions.delay * 1000); // set timeout for next command
+                                } else {
+                                    runCommands(i + 1); // just run again to cancel
+                                }
+
+                            });                                        
+                        })
+                    }
+                })
+            }
+        } else {
+            console.log("[ERROR] " + err);
+        }
+    }) // run offline commands    
+    
     client.duePlayers(function(err, info) { // get due players list from BuyCraft API
         maininfo = info;
         if(err) {
@@ -39,7 +85,8 @@ function checkDue() {
                 
                 var rclient = new Rcon(c.MINECRAFT_SERVER_RCON_IP, c.MINECRAFT_SERVER_RCON_PORT); // create rcon client
                 
-                rclient.auth(c.MINECRAFT_SERVER_RCON_PASSWORD, function(err){ // only authenticate when needed
+                rclient.auth(c.MINECRAFT_SERVER_RCON_PASSWORD, function(err){ // only authenticate when needed                    
+                    
                     rclient.command("list", function(err, resp){ // check if all players are online
                         onlineplayers = util.getOnlinePlayers(resp, players);
 
@@ -67,18 +114,19 @@ function checkDue() {
                                             runCommands(0);
 
                                             function runCommands(i) {
+                                                var thisCommand = commands[i];
                                                 if(i >= commands.length) {
                                                     nextPlayer(n + 1);
                                                     return;
                                                 }
-                                                finalcommand = util.removeDoubles(commands[i].command);
+                                                finalcommand = util.removeDoubles(thisCommand.command);
                                                 finalcommand = finalcommand.replace("{name}", player.name); // replace name with player name
 
                                                 rclient.command(finalcommand, function(err, resp) {
-                                                    console.log("[INFO] Processed command " + commands[i].id + " ( " + finalcommand + " ) by " + player.name + ".");
-                                                    client.deleteCommands([commands[i].id], function(err, bool) { // delete command from BuyCraft
+                                                    console.log("[INFO] Processed command " + thisCommand.id + " ( " + finalcommand + " ) by " + player.name + ".");
+                                                    client.deleteCommands([thisCommand.id], function(err, bool) { // delete command from BuyCraft
                                                         if(!err && debug) {
-                                                            console.log("[DEBUG] Deleted command "+commands[i].id+".");
+                                                            console.log("[DEBUG] Deleted command "+thisCommand.id+".");
                                                         }
 
                                                         commandcount--;
@@ -88,7 +136,7 @@ function checkDue() {
                                                         }                                                                                                        
 
                                                         if(commandcount > 0) {
-                                                            setTimeout(runCommands.bind(null, i + 1), c.INTERVAL_BETWEEN_COMMAND_SENT * 1000); // set timeout for next command
+                                                            setTimeout(runCommands.bind(null, i + 1), c.INTERVAL_BETWEEN_COMMAND_SENT * 1000 + thisCommand.conditions.delay * 1000); // set timeout for next command
                                                         } else {
                                                             runCommands(i + 1); // just run again to cancel
                                                         }
