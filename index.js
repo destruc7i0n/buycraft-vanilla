@@ -41,7 +41,7 @@ function checkDue() {
                             return;
                         }                    
                         finalcommand = util.removeDoubles(thisCommand.command);
-                        finalcommand = finalcommand.replace("{name}", player.name); // replace name with player name
+                        finalcommand = finalcommand.replace("{name}", thisCommand.player.name); // replace name with player name
                         
                         rclient.command(finalcommand, function(err, resp) {
                             console.log("[INFO] Processed command " + thisCommand.id + " ( " + finalcommand + " ) by " + thisCommand.player.name + ".");
